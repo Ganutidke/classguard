@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const HeroSection = () => {
   return (
-    <div className=" min-h-screen bg-gradient-to-r from-white to-pink-50  xl:bg-hero-pattern flex  items-center ">
+    <div className=" min-h-screen bg-gradient-to-r from-white to-pink-50 bg-cover bg-no-repeat xl:bg-hero-pattern flex  items-center ">
       <div className="lg:max-w-6xl max-w-3xl mx-auto  flex-col lg:flex-row items-center xl:gap-5 justify-between px-4 py-16 flex">
         <div className="lg:w-1/2">
           <h1 className="lg:text-5xl text-4xl font-bold text-black">

@@ -60,7 +60,7 @@ const UploadSection = () => {
   };
 
   return (
-    <section id="upload" className="py-20 bg-gradient-to-r from-white to-pink-50  lg:bg-hero-upload lg:bg-no-repeat">
+    <section id="upload" className="py-20 bg-gradient-to-r from-white to-pink-50  lg:bg-hero-upload lg:bg-no-repeat bg-cover">
       <div className="container mx-auto text-center">
         <h2 className="text-3xl font-bold mb-8">Upload Excel Sheet</h2>
         
