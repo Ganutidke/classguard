@@ -1,16 +1,32 @@
-
-'use client'
+'use client';
 import { useState } from 'react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UploadSection = () => {
   const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState('');
   const [minPercentage, setMinPercentage] = useState(75); // Default value
   const [defaulters, setDefaulters] = useState([]);
   const [downloadVisible, setDownloadVisible] = useState(false);
+  const [collegeName, setCollegeName] = useState('');
+  const [className, setClassName] = useState('');
+  const [academicYear, setAcademicYear] = useState('');
+  const [division, setDivision] = useState('');
+  const [department, setDepartment] = useState('');
+  const [date, setDate] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const rowsPerPage = 10;
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setFileName(selectedFile.name);
+    toast.success(`File ${selectedFile.name} uploaded successfully!`);
   };
 
   const handlePercentageChange = (e) => {
@@ -34,21 +50,29 @@ const UploadSection = () => {
         const filteredDefaulters = jsonData.filter(student => {
           const attendance = (student['Lectures Attended'] / student['Total Lectures']) * 100;
           student['Percentage'] = attendance.toFixed(2);  // Add percentage to each student
+
+          // Validation Condition
+          if (student['Lectures Attended'] < 0 || student['Lectures Attended'] > student['Total Lectures']) {
+            toast.error('Invalid data: Lectures Attended must not be negative or exceed Total Lectures.');
+            throw new toast.error('Invalid data in the file.');
+          }
+
           return attendance < minPercentage;
         });
 
         setDefaulters(filteredDefaulters);
         setDownloadVisible(filteredDefaulters.length > 0);
+        setCurrentPage(1); // Reset to first page when new data is loaded
       } catch (error) {
         console.error('Error processing file:', error);
-        alert('There was an error processing the file. Please ensure it is correctly formatted.');
+        toast.error('There was an error processing the file. Please ensure it is correctly formatted.');
       }
     };
 
     reader.readAsArrayBuffer(file);
   };
 
-  const downloadFile = () => {
+  const downloadExcel = () => {
     const now = new Date();
     const formattedDate = now.toISOString().slice(0, 19).replace(/:/g, '-');
     const filename = `defaulter-list_${formattedDate}.xlsx`;
@@ -59,11 +83,101 @@ const UploadSection = () => {
     XLSX.writeFile(newWorkbook, filename);
   };
 
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(12);
+    doc.setFont('Times', 'bold');
+
+    // Add header
+    doc.text(`Dr.D.Y.Patil Unitech Socienty's`, 105, 5, null, null, 'center')
+    doc.setFontSize(13);
+    doc.text(`${collegeName}`, 105, 10, null, null, 'center');
+    doc.text(`Academic Year: ${academicYear}`, 105, 40, null, null, 'center');
+    doc.text(`${department}`, 105, 20, null, null, 'center');
+    doc.text(`Class: ${className}   Div: ${division}`, 105, 30, null, null, 'center');
+    doc.text(`Defaulter List | Date: ${date}`, 105, 50, null, null, 'center');
+    // Add table
+    const tableColumn = ['Roll Number', 'Name', 'Total Lectures', 'Lectures Attended', 'Percentage'];
+    const tableRows = defaulters.map(student => [
+      student['Roll Number'],
+      student['Name'],
+      student['Total Lectures'],
+      student['Lectures Attended'],
+      `${student['Percentage']}%`,
+    ]);
+
+    doc.autoTable({
+      startY: 60,
+      head: [tableColumn],
+      body: tableRows,
+    });
+
+    doc.save(`defaulter-list-${fileName}.pdf`);
+  };
+
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = defaulters.slice(indexOfFirstRow, indexOfLastRow);
+  const totalPages = Math.ceil(defaulters.length / rowsPerPage);
+
   return (
     <section id="upload" className="py-20 bg-gradient-to-r from-white to-pink-50 lg:bg-hero-upload lg:bg-no-repeat lg:bg-cover">
+      <ToastContainer />
       <div className="container mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-8">Upload Excel Sheet</h2>
+        <h2 className="text-3xl font-bold mb-8">Upload Excel Sheet and Details</h2>
         <div className="bg-white shadow-lg rounded-lg p-8 mb-8 max-w-xl mx-auto">
+
+          {/* Form Fields */}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="College Name"
+              value={collegeName}
+              onChange={(e) => setCollegeName(e.target.value)}
+              className="w-full mb-2 p-2 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="text"
+              placeholder="Department"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              className="w-full mb-2 p-2 border border-gray-300 rounded-lg"
+            />
+            <div className='flex gap-3'>
+              <input
+                type="text"
+                placeholder="Class"
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
+                className="w-full mb-2 p-2 border border-gray-300 rounded-lg"
+              />
+              <input
+                type="text"
+                placeholder="Academic Year"
+                value={academicYear}
+                onChange={(e) => setAcademicYear(e.target.value)}
+                className="w-full mb-2 p-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+            <div className='flex gap-3'>
+              <input
+                type="text"
+                placeholder="Division"
+                value={division}
+                onChange={(e) => setDivision(e.target.value)}
+                className="w-full mb-2 p-2 border border-gray-300 rounded-lg"
+              />
+
+              <input
+                type="date"
+                placeholder="Date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full mb-2 p-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          </div>
+
           {/* File Upload Section */}
           <div className="flex items-center justify-center w-full mb-8">
             <label
@@ -89,6 +203,8 @@ const UploadSection = () => {
                 <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold">Click to upload</span> or drag and drop
                 </p>
+                {fileName && <p className="mt-2 text-sm text-green-600">Selected file: {fileName}</p>}
+
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Excel Sheet Only
                 </p>
@@ -101,7 +217,7 @@ const UploadSection = () => {
               />
             </label>
           </div>
-          
+
           {/* Minimum Attendance Percentage Input */}
           <div className="mb-4">
             <label
@@ -115,20 +231,17 @@ const UploadSection = () => {
               id="percentage"
               value={minPercentage}
               onChange={handlePercentageChange}
-              className="mt-2 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mt-1 w-full p-2 border border-gray-300 rounded-lg"
+              placeholder="Enter minimum attendance percentage"
             />
           </div>
-          
-          {/* Process File Button */}
+
           <button
             onClick={processFile}
-            className="w-full bg-gray-900 text-white py-2 px-4 rounded hover:bg-gray-700 transition"
+            className="w-full py-2 px-4 bg-black  text-white font-semibold rounded-lg transition duration-300"
           >
-            Process File
+            Generate Defaulter List
           </button>
-          <p className="mt-4 text-xs text-gray-500">
-            By using our converter, you accept our <a href="#" className="underline">Terms and Conditions</a> of use and our <a href="#" className="underline">Privacy Policy</a>.
-          </p>
         </div>
 
         {/* Result Section */}
@@ -148,7 +261,7 @@ const UploadSection = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {defaulters.map((student, index) => (
+                    {currentRows.map((student, index) => (
                       <tr key={index} className="border-b">
                         <td className="border px-4 py-2">{student['Roll Number']}</td>
                         <td className="border px-4 py-2">{student.Name}</td>
@@ -160,17 +273,43 @@ const UploadSection = () => {
                   </tbody>
                 </table>
               </div>
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`py-2 px-4 mr-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition duration-300 ${currentPage === 1 && 'opacity-50 cursor-not-allowed'}`}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`py-2 px-4 ml-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg transition duration-300 ${currentPage === totalPages && 'opacity-50 cursor-not-allowed'}`}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
               {downloadVisible && (
-                <button
-                  onClick={downloadFile}
-                  className="mt-6 w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-500 transition"
-                >
-                  Download Defaulter List
-                </button>
+                <div className="flex justify-around mt-4">
+                  <button
+                    onClick={downloadExcel}
+                    className="py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition duration-300"
+                  >
+                    Download Excel
+                  </button>
+                  <button
+                    onClick={downloadPDF}
+                    className="py-2 px-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition duration-300"
+                  >
+                    Download PDF
+                  </button>
+                </div>
               )}
             </>
           ) : (
-            <p className="text-gray-600">No defaulters found.</p>
+            <p className="text-gray-600">No defaulters found based on the selected criteria.</p>
           )}
         </div>
       </div>
@@ -179,5 +318,3 @@ const UploadSection = () => {
 };
 
 export default UploadSection;
-
-

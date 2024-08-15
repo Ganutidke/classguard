@@ -8,7 +8,7 @@ const HeroSection = () => {
   return (
     <div className=" min-h-screen bg-gradient-to-r from-white to-pink-50 bg-cover bg-no-repeat xl:bg-hero-pattern flex  items-center ">
       <div className="lg:max-w-6xl max-w-3xl mx-auto  flex-col lg:flex-row items-center xl:gap-5 justify-between px-4 py-16 flex">
-        <div className="lg:w-1/2">
+        <div className="lg:w-3/5">
           <h1 className="lg:text-5xl text-4xl font-bold text-black">
             Welcome to <span className="text-purple-600">ClassGuard</span>
           </h1>
@@ -25,8 +25,8 @@ const HeroSection = () => {
             </Link>
           </div>
         </div>
-        <div className="flex justify-center lg:w-1/2 ">
-          <Image src={heroImage} alt="Hero Image" width={420} height={100} />
+        <div className="hidden lg:flex justify-center  lg:w-2/5 ">
+          <Image src={heroImage} alt="Hero Image" width={500} height={150}  className="object-cover"/>
         </div>
       </div>
     </div>
