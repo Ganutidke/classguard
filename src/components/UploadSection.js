@@ -89,7 +89,7 @@ const UploadSection = () => {
     doc.setFont('Times', 'bold');
 
     // Add header
-    doc.text(`Dr.D.Y.Patil Unitech Socienty's`, 105, 5, null, null, 'center')
+    doc.text(`Dr.D.Y.Patil Unitech Society's`, 105, 5, null, null, 'center')
     doc.setFontSize(13);
     doc.text(`${collegeName}`, 105, 10, null, null, 'center');
     doc.text(`Academic Year: ${academicYear}`, 105, 40, null, null, 'center');
@@ -240,8 +240,12 @@ const UploadSection = () => {
             onClick={processFile}
             className="w-full py-2 px-4 bg-black  text-white font-semibold rounded-lg transition duration-300"
           >
-            Generate Defaulter List
+             Process File
           </button>
+          <p className="mt-4 text-xs text-gray-500">
+            By using our converter, you accept our <a href="#" className="underline">Terms and Conditions</a> of use and our <a href="#" className="underline">Privacy Policy</a>.
+          </p>
+
         </div>
 
         {/* Result Section */}
