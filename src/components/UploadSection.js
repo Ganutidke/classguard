@@ -85,7 +85,7 @@ const UploadSection = () => {
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(12);
+    doc.setFontSize(10);
     doc.setFont('Times', 'bold');
 
     // Add header
@@ -97,12 +97,11 @@ const UploadSection = () => {
     doc.text(`Class: ${className}   Div: ${division}`, 105, 30, null, null, 'center');
     doc.text(`Defaulter List | Date: ${date}`, 105, 50, null, null, 'center');
     // Add table
-    const tableColumn = ['Roll Number', 'Name', 'Total Lectures', 'Lectures Attended', 'Percentage'];
-    const tableRows = defaulters.map(student => [
+    const tableColumn = ['Sr. No', 'Roll Number', 'Name of Students', 'Percentage'];
+    const tableRows = defaulters.map((student, index) => [
+      index + 1,
       student['Roll Number'],
       student['Name'],
-      student['Total Lectures'],
-      student['Lectures Attended'],
       `${student['Percentage']}%`,
     ]);
 
@@ -110,6 +109,30 @@ const UploadSection = () => {
       startY: 60,
       head: [tableColumn],
       body: tableRows,
+      styles: {
+        fillColor: [255, 255, 255], // White background for all cells
+        textColor: [0, 0, 0], // Black text color
+        lineColor: [0, 0, 0], // Black border color
+        lineWidth: 0.1, // Ensure border width is set
+      },
+      headStyles: {
+        fillColor: [255, 255, 255], // White background for header cells
+        textColor: [0, 0, 0], // Black text color
+        lineColor: [0, 0, 0], // Black border color
+        lineWidth: 0.1, // Ensure border width is set
+        fontStyle: 'bold',
+      },
+      bodyStyles: {
+        fillColor: [255, 255, 255], // White background for body cells
+        textColor: [0, 0, 0], // Black text color
+        lineColor: [0, 0, 0], // Black border color
+        lineWidth: 0.1, // Ensure border width is set
+      },
+      alternateRowStyles: {
+        fillColor: [255, 255, 255], // White background for alternate rows
+      },
+      tableLineColor: [0, 0, 0], // Black border color for the entire table
+      tableLineWidth: 0.1, // Ensure the entire table border width is set
     });
 
     doc.save(`defaulter-list-${fileName}.pdf`);
@@ -240,7 +263,7 @@ const UploadSection = () => {
             onClick={processFile}
             className="w-full py-2 px-4 bg-black  text-white font-semibold rounded-lg transition duration-300"
           >
-             Process File
+            Process File
           </button>
           <p className="mt-4 text-xs text-gray-500">
             By using our converter, you accept our <a href="#" className="underline">Terms and Conditions</a> of use and our <a href="#" className="underline">Privacy Policy</a>.
