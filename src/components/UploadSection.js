@@ -88,16 +88,18 @@ const UploadSection = () => {
     doc.setFontSize(10);
     doc.setFont('Times', 'bold');
 
+    const formattedDate = new Date(date).toLocaleDateString('en-GB');
+
     // Add header
     doc.text(`Dr.D.Y.Patil Unitech Society's`, 105, 5, null, null, 'center')
     doc.setFontSize(13);
     doc.text(`${collegeName}`, 105, 10, null, null, 'center');
     doc.text(`Academic Year: ${academicYear}`, 105, 40, null, null, 'center');
-    doc.text(`${department}`, 105, 20, null, null, 'center');
+    doc.text(`Department: ${department}`, 105, 20, null, null, 'center');
     doc.text(`Class: ${className}   Div: ${division}`, 105, 30, null, null, 'center');
-    doc.text(`Defaulter List | Date: ${date}`, 105, 50, null, null, 'center');
+    doc.text(`Defaulter List | Date: ${formattedDate}`, 105, 50, null, null, 'center');
     // Add table
-    const tableColumn = ['Sr. No', 'Roll Number', 'Name of Students', 'Percentage'];
+    const tableColumn = ['Sr. No', 'Roll Number', 'Name of Students', 'Attendance Percentage'];
     const tableRows = defaulters.map((student, index) => [
       index + 1,
       student['Roll Number'],
@@ -134,6 +136,19 @@ const UploadSection = () => {
       tableLineColor: [0, 0, 0], // Black border color for the entire table
       tableLineWidth: 0.1, // Ensure the entire table border width is set
     });
+
+    const footerY = doc.internal.pageSize.height - 30; // Position the footer 30 units from the bottom of the page
+    doc.setFontSize(11);
+    doc.text(`Class Teacher`, 40, footerY, null, null, 'center');
+    doc.text(`Coordinator`, 105, footerY, null, null, 'center');
+    doc.text(`Incharge Principal`, 170, footerY, null, null, 'center');
+
+    // Leave space above for signatures
+    const signatureY = footerY - 10; // Position the signature space 20 units above the footer text
+    doc.setFontSize(11);
+    doc.text(`___________________`, 40, signatureY, null, null, 'center');
+    doc.text(`___________________`, 105, signatureY, null, null, 'center');
+    doc.text(`___________________`, 170, signatureY, null, null, 'center');
 
     doc.save(`defaulter-list-${fileName}.pdf`);
   };
